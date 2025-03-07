@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: MIT-0
+// SPDX-FileCopyrightText: Copyright (c) 2025 JanSimplify
+
+@autogen_notice@
+
+#include <@project_name_lowercase@/version.hpp>
+
+namespace @project_name_lowercase@
+{
+std::string_view version() noexcept
+{
+    using namespace std::string_view_literals;
+    return "@PROJECT_VERSION@"sv;
+}
+
+unsigned int major() noexcept
+{
+    return @PROJECT_VERSION_MAJOR@ + 0;
+}
+
+unsigned int minor() noexcept
+{
+    return @PROJECT_VERSION_MINOR@ + 0;
+}
+
+unsigned int patch() noexcept
+{
+    return @PROJECT_VERSION_PATCH@ + 0;
+}
+
+unsigned int tweak() noexcept
+{
+    return @PROJECT_VERSION_TWEAK@ + 0;
+}
+
+} // namespace @project_name_lowercase@

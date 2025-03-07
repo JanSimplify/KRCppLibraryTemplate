@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: MIT-0
+// SPDX-FileCopyrightText: Copyright (c) 2025 JanSimplify
+@autogen_notice@
+#pragma once
+
+#include <string_view>
+
+#include <@project_name_lowercase@/export.hpp>
+
+namespace @project_name_lowercase@
+{
+@project_name_uppercase@_EXPORT std::string_view version() noexcept;
+
+@project_name_uppercase@_EXPORT unsigned int major() noexcept;
+@project_name_uppercase@_EXPORT unsigned int minor() noexcept;
+@project_name_uppercase@_EXPORT unsigned int patch() noexcept;
+@project_name_uppercase@_EXPORT unsigned int tweak() noexcept;
+} // namespace @project_name_lowercase@

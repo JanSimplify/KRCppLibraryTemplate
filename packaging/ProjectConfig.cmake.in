@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: MIT-0
+# SPDX-FileCopyrightText: Copyright (c) 2025 JanSimplify
+
+@PACKAGE_INIT@
+
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
+
+option(
+    "@PROJECT_NAME@_USE_SHARED_LIBS"
+    "Default to SHARED libraries"
+    "${BUILD_SHARED_LIBS}"
+)
+
+block()
+    set(use_shared_libs "${@PROJECT_NAME@_USE_SHARED_LIBS}")
+    set(static_export_file "@PACKAGE_INSTALL_CMAKE_CONFIG_DIR@/@static_target_export@.cmake")
+    set(shared_export_file "@PACKAGE_INSTALL_CMAKE_CONFIG_DIR@/@shared_target_export@.cmake")
+
+    if(NOT CMAKE_MAP_IMPORTED_CONFIG_DEBUG)
+        set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG "Debug;RelWithDebInfo;Release;MinSizeRel;;")
+    endif()
+
+    if(NOT CMAKE_MAP_IMPORTED_CONFIG_RELEASE)
+        set(CMAKE_MAP_IMPORTED_CONFIG_RELEASE "Release;MinSizeRel;RelWithDebInfo;Debug;;")
+    endif()
+
+    if(NOT CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO)
+        set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO "RelWithDebInfo;Release;MinSizeRel;Debug;;")
+    endif()
+
+    if(NOT CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL)
+        set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL "MinSizeRel;Release;RelWithDebInfo;Debug;;")
+    endif()
+
+    if(EXISTS "${static_export_file}")
+        include("${static_export_file}")
+        if(NOT use_shared_libs)
+            add_library("@library_alias_target@" ALIAS "@static_alias_target@")
+        endif()
+    endif()
+
+    if(EXISTS "${shared_export_file}")
+        include("${shared_export_file}")
+        if(use_shared_libs)
+            add_library("@library_alias_target@" ALIAS "@shared_alias_target@")
+        endif()
+    endif()
+endblock()
+
+check_required_components("@PROJECT_NAME@")
