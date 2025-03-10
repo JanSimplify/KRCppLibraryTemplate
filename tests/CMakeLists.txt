@@ -14,6 +14,14 @@ string(TOLOWER ${PROJECT_NAME} project_name_lowercase)
 # Options
 #=============================
 
+option(
+    "${package_name}_ENABLE_CODE_COVERAGE"
+    "Enable code coverage analysis"
+    OFF
+)
+
+set(enable_code_coverage "${${package_name}_ENABLE_CODE_COVERAGE}")
+
 #=============================
 # Dependencies
 #=============================

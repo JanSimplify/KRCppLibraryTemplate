@@ -98,6 +98,12 @@ if(enable_develop_mode)
     )
 endif()
 
+if(enable_code_coverage)
+    krcmake_target_set_coverage(
+        TARGETS "${static_target}" "${shared_target}"
+    )
+endif()
+
 #=============================
 # Export header
 #=============================
