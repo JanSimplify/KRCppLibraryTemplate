@@ -69,3 +69,10 @@ if(enable_code_coverage)
         TARGETS "${test_target}"
     )
 endif()
+
+if(enable_address_sanitizer)
+    krcmake_target_set_sanitizer(
+        TARGETS "${test_target}"
+        ADDRESS
+    )
+endif()

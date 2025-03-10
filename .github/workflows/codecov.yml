@@ -47,11 +47,17 @@ jobs:
         id: strings
         env:
           WORKSPACE: ${{ github.workspace }}
+          OS: ${{ matrix.os }}
         run: |
           {
             echo source-dir="${WORKSPACE}"
             echo build-dir="${WORKSPACE}/build"
           } >>"${GITHUB_OUTPUT}"
+          if [[ ${OS} =~ windows-* ]]; then
+            echo use-asan="OFF" >>"${GITHUB_OUTPUT}"
+          else
+            echo use-asan="ON" >>"${GITHUB_OUTPUT}"
+          fi
 
       - name: Configure CMake
         env:
@@ -60,12 +66,14 @@ jobs:
           BUILD_TYPE: ${{ matrix.build_type }}
           C_COMPILE: ${{ matrix.c_compiler }}
           CXX_COMPILE: ${{ matrix.cxx_compiler }}
+          USE_ASAN: ${{ steps.strings.outputs.use-asan }}
         run: >
           cmake -S "${SOURCE_DIR}" -B "${BINARY_DIR}"
           -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
           -DCMAKE_C_COMPILER="${C_COMPILE}"
           -DCMAKE_CXX_COMPILER="${CXX_COMPILE}"
           -DKRLibrary_ENABLE_CODE_COVERAGE=ON
+          -DKRLibrary_ENABLE_ADDRESS_SANITIZER="${USE_ASAN}"
 
       - name: Build
         env:
