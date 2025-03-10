@@ -50,6 +50,12 @@ option(
     OFF
 )
 
+option(
+    "${PROJECT_NAME}_ENABLE_CODE_COVERAGE"
+    "Enable code coverage analysis"
+    OFF
+)
+
 cmake_dependent_option(
     "${PROJECT_NAME}_ENABLE_TEST"
     "Enalbe test"
@@ -66,22 +72,16 @@ cmake_dependent_option(
     OFF
 )
 
-option(
-    "${PROJECT_NAME}_ENABLE_CODE_COVERAGE"
-    "Enable code coverage analysis"
-    OFF
-)
-
 set(use_shared_libs "${${PROJECT_NAME}_USE_SHARED_LIBS}")
 
 set(enable_install_shared "${${PROJECT_NAME}_ENABLE_INSTALL_SHARED}")
 set(enable_install_static "${${PROJECT_NAME}_ENABLE_INSTALL_STATIC}")
 
 set(enable_address_sanitizer "${${PROJECT_NAME}_ENABLE_ADDRESS_SANITIZER}")
+set(enable_code_coverage "${${PROJECT_NAME}_ENABLE_CODE_COVERAGE}")
 
 set(enable_test "${${PROJECT_NAME}_ENABLE_TEST}")
 set(enable_develop_mode "${${PROJECT_NAME}_DEVELOP_MODE}")
-set(enable_code_coverage "${${PROJECT_NAME}_ENABLE_CODE_COVERAGE}")
 
 #=============================
 # Dependencies
