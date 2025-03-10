@@ -91,6 +91,13 @@ krcmake_target_compile_options(
             "/permissive-"
 )
 
+if(enable_develop_mode)
+    krcmake_target_set_develop_mode(
+        TARGETS "${static_target}" "${shared_target}"
+        ERROR_AS_FATAL
+    )
+endif()
+
 #=============================
 # Export header
 #=============================
