@@ -104,6 +104,13 @@ if(enable_code_coverage)
     )
 endif()
 
+if(enable_address_sanitizer)
+    krcmake_target_set_sanitizer(
+        TARGETS "${static_target}" "${shared_target}"
+        ADDRESS
+    )
+endif()
+
 #=============================
 # Export header
 #=============================

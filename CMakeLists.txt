@@ -44,6 +44,12 @@ option(
     "${PROJECT_IS_TOP_LEVEL}"
 )
 
+option(
+    ${PROJECT_NAME}_ENABLE_ADDRESS_SANITIZER
+    "Enable address sanitizer"
+    OFF
+)
+
 cmake_dependent_option(
     "${PROJECT_NAME}_ENABLE_TEST"
     "Enalbe test"
@@ -71,6 +77,8 @@ set(use_shared_libs "${${PROJECT_NAME}_USE_SHARED_LIBS}")
 set(enable_install_shared "${${PROJECT_NAME}_ENABLE_INSTALL_SHARED}")
 set(enable_install_static "${${PROJECT_NAME}_ENABLE_INSTALL_STATIC}")
 
+set(enable_address_sanitizer "${${PROJECT_NAME}_ENABLE_ADDRESS_SANITIZER}")
+
 set(enable_test "${${PROJECT_NAME}_ENABLE_TEST}")
 set(enable_develop_mode "${${PROJECT_NAME}_DEVELOP_MODE}")
 set(enable_code_coverage "${${PROJECT_NAME}_ENABLE_CODE_COVERAGE}")
@@ -80,6 +88,13 @@ set(enable_code_coverage "${${PROJECT_NAME}_ENABLE_CODE_COVERAGE}")
 #=============================
 
 include(cmake/dependencies.cmake)
+
+# set asan for catch2
+if(enable_address_sanitizer)
+    add_compile_options(
+        "$<$<OR:$<COMPILE_LANG_AND_ID:C,MSVC>,$<COMPILE_LANG_AND_ID:CXX,MSVC>>:/fsanitize=address>"
+    )
+endif()
 
 #=============================
 # Targets
