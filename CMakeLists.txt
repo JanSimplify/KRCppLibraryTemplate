@@ -45,7 +45,7 @@ option(
 )
 
 option(
-    ${PROJECT_NAME}_ENABLE_ADDRESS_SANITIZER
+    "${PROJECT_NAME}_ENABLE_ADDRESS_SANITIZER"
     "Enable address sanitizer"
     OFF
 )

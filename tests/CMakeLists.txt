@@ -15,7 +15,7 @@ string(TOLOWER ${PROJECT_NAME} project_name_lowercase)
 #=============================
 
 option(
-    ${package_name}_ENABLE_ADDRESS_SANITIZER
+    "${package_name}_ENABLE_ADDRESS_SANITIZER"
     "Enable address sanitizer"
     OFF
 )
