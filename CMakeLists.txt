@@ -52,12 +52,21 @@ cmake_dependent_option(
     OFF
 )
 
+cmake_dependent_option(
+    "${PROJECT_NAME}_DEVELOP_MODE"
+    "Enalbe develop mode"
+    ON
+    "PROJECT_IS_TOP_LEVEL"
+    OFF
+)
+
 set(use_shared_libs "${${PROJECT_NAME}_USE_SHARED_LIBS}")
 
 set(enable_install_shared "${${PROJECT_NAME}_ENABLE_INSTALL_SHARED}")
 set(enable_install_static "${${PROJECT_NAME}_ENABLE_INSTALL_STATIC}")
 
 set(enable_test "${${PROJECT_NAME}_ENABLE_TEST}")
+set(enable_develop_mode "${${PROJECT_NAME}_DEVELOP_MODE}")
 
 #=============================
 # Dependencies

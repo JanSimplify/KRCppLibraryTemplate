@@ -58,3 +58,8 @@ krcmake_target_compile_options(
             "/utf-8"
             "/permissive-"
 )
+
+krcmake_target_set_develop_mode(
+    TARGETS "${test_target}"
+    ERROR_AS_FATAL
+)
