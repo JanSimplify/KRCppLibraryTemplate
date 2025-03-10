@@ -1,0 +1,52 @@
+name: Check code style
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check-code-sytle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute fetch depth
+        id: commits
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_COMMITS: ${{ toJson(github.event.commits )}}
+          PR_COMMITS: ${{ github.event.pull_request.commits }}
+        run: |
+          if [[ ${EVENT_NAME} == 'push' ]]; then
+            commits=$(echo "${PUSH_COMMITS}" | jq '. | length')
+          else
+            commits=${PR_COMMITS}
+          fi
+          echo commits="${commits}" >>"${GITHUB_OUTPUT}"
+          echo depth=$((commits + 1)) >>"${GITHUB_OUTPUT}"
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ steps.commits.outputs.depth }}
+
+      - name: Validate commits
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          COMMITS: ${{ steps.commits.outputs.commits }}
+        run: |
+          if [[ ${EVENT_NAME} == 'push' ]]; then
+            base="HEAD~${COMMITS}"
+          else
+            base=${PR_BASE}
+          fi
+          git diff --name-only --diff-filter=d "${base}" | {
+            grep -E '\.(c|cpp|h|hpp)$' || [[ $? -le 1 ]]
+          } | tr '\n' '\0' | xargs -0 clang-format --dry-run -Werror
