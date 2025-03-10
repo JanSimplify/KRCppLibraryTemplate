@@ -1,0 +1,104 @@
+name: Codecov
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  codecov:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            c_compiler: cl
+            cxx_compiler: cl
+            build_type: Debug
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cxx_compiler: g++
+            build_type: Debug
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gcovr
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: pip install gcovr
+
+      - name: Install OpenCppCoverage
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        run: |
+          choco install OpenCppCoverage -y
+          echo 'C:\Program Files\OpenCppCoverage' >>"${GITHUB_PATH}"
+
+      - name: Set reusable strings
+        id: strings
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          {
+            echo source-dir="${WORKSPACE}"
+            echo build-dir="${WORKSPACE}/build"
+          } >>"${GITHUB_OUTPUT}"
+
+      - name: Configure CMake
+        env:
+          SOURCE_DIR: ${{ steps.strings.outputs.source-dir }}
+          BINARY_DIR: ${{ steps.strings.outputs.build-dir }}
+          BUILD_TYPE: ${{ matrix.build_type }}
+          C_COMPILE: ${{ matrix.c_compiler }}
+          CXX_COMPILE: ${{ matrix.cxx_compiler }}
+        run: >
+          cmake -S "${SOURCE_DIR}" -B "${BINARY_DIR}"
+          -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+          -DCMAKE_C_COMPILER="${C_COMPILE}"
+          -DCMAKE_CXX_COMPILER="${CXX_COMPILE}"
+          -DKRLibrary_ENABLE_CODE_COVERAGE=ON
+
+      - name: Build
+        env:
+          BINARY_DIR: ${{ steps.strings.outputs.build-dir }}
+          BUILD_TYPE: ${{ matrix.build_type }}
+        run: cmake --build "${BINARY_DIR}" --config "${BUILD_TYPE}"
+
+      - name: Test
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        working-directory: ${{ steps.strings.outputs.build-dir }}
+        env:
+          BUILD_TYPE: ${{ matrix.build_type }}
+        run: ctest --build-config "${BUILD_TYPE}"
+
+      - name: Call gcovr
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: gcovr --xml codecov.xml
+
+      - name: Call OpenCppCoverage
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        env:
+          BUILD_TYPE: ${{ matrix.build_type }}
+        run: >
+          OpenCppCoverage.exe
+          --config_file OpenCppCoverage.conf
+          --export_type cobertura:codecov.xml
+          -- ctest --build-config "${BUILD_TYPE}"
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
+        with:
+          name: ${{ matrix.os }}
+          files: codecov.xml
+          disable_search: true
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}

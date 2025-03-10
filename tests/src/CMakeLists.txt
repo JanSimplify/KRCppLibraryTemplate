@@ -63,3 +63,9 @@ krcmake_target_set_develop_mode(
     TARGETS "${test_target}"
     ERROR_AS_FATAL
 )
+
+if(enable_code_coverage)
+    krcmake_target_set_coverage(
+        TARGETS "${test_target}"
+    )
+endif()
