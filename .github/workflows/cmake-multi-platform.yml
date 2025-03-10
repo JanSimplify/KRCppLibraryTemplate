@@ -1,0 +1,119 @@
+name: CMake on multiple platforms
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: ON
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: windows-latest
+          c_compiler: cl
+          cxx_compiler: cl
+          build_type: Release
+        - os: ubuntu-latest
+          c_compiler: gcc
+          cxx_compiler: g++
+          build_type: Release
+        - os: ubuntu-latest
+          c_compiler: clang
+          cxx_compiler: clang++
+          build_type: Release
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set reusable strings
+      id: strings
+      env:
+        WORKSPACE: ${{ github.workspace }}
+      run: |
+        {
+          echo source-dir="${WORKSPACE}"
+          echo build-dir="${WORKSPACE}/build"
+          echo install-dir="${WORKSPACE}/install"
+          echo tests-source-dir="${WORKSPACE}/tests"
+          echo tests-build-dir="${WORKSPACE}/tests/build"
+        } >>"${GITHUB_OUTPUT}"
+
+    - name: Configure CMake
+      env:
+        SOURCE_DIR: ${{ steps.strings.outputs.source-dir }}
+        BINARY_DIR: ${{ steps.strings.outputs.build-dir }}
+        BUILD_TYPE: ${{ matrix.build_type }}
+        C_COMPILE: ${{ matrix.c_compiler }}
+        CXX_COMPILE: ${{ matrix.cxx_compiler }}
+      run: >
+        cmake -S "${SOURCE_DIR}" -B "${BINARY_DIR}"
+        -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+        -DCMAKE_C_COMPILER="${C_COMPILE}"
+        -DCMAKE_CXX_COMPILER="${CXX_COMPILE}"
+        -DCMAKE_VS_GLOBALS="UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true"
+
+    - name: Build
+      env:
+        BINARY_DIR: ${{ steps.strings.outputs.build-dir }}
+        BUILD_TYPE: ${{ matrix.build_type }}
+      run: cmake --build "${BINARY_DIR}" --config "${BUILD_TYPE}" -j
+
+    - name: Test
+      env:
+        OS: ${{ matrix.os }}
+        BUILD_TYPE: ${{ matrix.build_type }}
+      working-directory: ${{ steps.strings.outputs.build-dir }}
+      run: |
+        if [[ ${OS} =~ windows* ]]; then
+          ctest --build-config "${BUILD_TYPE}" -LE sanitizer
+        else
+          ctest --build-config "${BUILD_TYPE}"
+        fi
+
+    - name: Install
+      env:
+        BINARY_DIR: ${{ steps.strings.outputs.build-dir }}
+        INSTALL_DIR: ${{ steps.strings.outputs.install-dir }}
+        BUILD_TYPE: ${{ matrix.build_type }}
+      run: cmake --install "${BINARY_DIR}" --config "${BUILD_TYPE}" --prefix "${INSTALL_DIR}"
+
+    - name: Configure Tests Shared Standalone
+      env:
+        SOURCE_DIR: ${{ steps.strings.outputs.tests-source-dir }}
+        BINARY_DIR: ${{ steps.strings.outputs.tests-build-dir }}
+        INSTALL_DIR: ${{ steps.strings.outputs.install-dir }}
+        BUILD_TYPE: ${{ matrix.build_type }}
+        C_COMPILE: ${{ matrix.c_compiler }}
+        CXX_COMPILE: ${{ matrix.cxx_compiler }}
+      run: >
+        cmake -S "${SOURCE_DIR}" -B "${BINARY_DIR}"
+        -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+        -DCMAKE_C_COMPILER="${C_COMPILE}"
+        -DCMAKE_CXX_COMPILER="${CXX_COMPILE}"
+        -DCMAKE_VS_GLOBALS="UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true"
+        -DKRLibrary_ROOT="${INSTALL_DIR}"
+        -DKRLibrary_USE_SHARED_LIBS=ON
+
+    - name: Build Tests Shared Standalone
+      env:
+        BINARY_DIR: ${{ steps.strings.outputs.tests-build-dir }}
+        BUILD_TYPE: ${{ matrix.build_type }}
+      run: cmake --build "${BINARY_DIR}" --config "${BUILD_TYPE}" -j
+
+    - name: Test Shared Standalone
+      working-directory: ${{ steps.strings.outputs.tests-build-dir }}
+      run: ctest --build-config ${{ matrix.build_type }}
