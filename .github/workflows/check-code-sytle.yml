@@ -47,6 +47,12 @@ jobs:
           else
             base=${PR_BASE}
           fi
-          git diff --name-only --diff-filter=d "${base}" | {
-            grep -E '\.(c|cpp|h|hpp)$' || [[ $? -le 1 ]]
-          } | tr '\n' '\0' | xargs -0 clang-format --dry-run -Werror
+          if git rev-parse --quiet --verify "${base}" >/dev/null; then
+            git diff --name-only --diff-filter=d "${base}" | {
+              grep -E '\.(c|cpp|h|hpp)$' || [[ $? -le 1 ]]
+            } | tr '\n' '\0' | xargs -0 clang-format --dry-run -Werror
+          else
+            git ls-tree -r --name-only HEAD | {
+              grep -E '\.(c|cpp|h|hpp)$' || [[ $? -le 1 ]]
+            } | tr '\n' '\0' | xargs -0 clang-format --dry-run -Werror
+          fi
