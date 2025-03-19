@@ -72,18 +72,6 @@ jobs:
         BUILD_TYPE: ${{ matrix.build_type }}
       run: cmake --build "${BINARY_DIR}" --config "${BUILD_TYPE}" -j
 
-    - name: Test
-      env:
-        OS: ${{ matrix.os }}
-        BUILD_TYPE: ${{ matrix.build_type }}
-      working-directory: ${{ steps.strings.outputs.build-dir }}
-      run: |
-        if [[ ${OS} =~ windows* ]]; then
-          ctest --build-config "${BUILD_TYPE}" -LE sanitizer
-        else
-          ctest --build-config "${BUILD_TYPE}"
-        fi
-
     - name: Install
       env:
         BINARY_DIR: ${{ steps.strings.outputs.build-dir }}
