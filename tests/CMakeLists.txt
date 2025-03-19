@@ -38,6 +38,13 @@ if(PROJECT_IS_TOP_LEVEL)
     find_package(${package_name} REQUIRED)
 endif()
 
+# set asan for catch2
+if(enable_address_sanitizer)
+    add_compile_options(
+        "$<$<OR:$<COMPILE_LANG_AND_ID:C,MSVC>,$<COMPILE_LANG_AND_ID:CXX,MSVC>>:/fsanitize=address>"
+    )
+endif()
+
 include(cmake/dependencies.cmake)
 
 #=============================
