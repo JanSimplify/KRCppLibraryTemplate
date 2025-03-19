@@ -72,6 +72,7 @@ jobs:
           -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
           -DCMAKE_C_COMPILER="${C_COMPILE}"
           -DCMAKE_CXX_COMPILER="${CXX_COMPILE}"
+          -DKRLibrary_ENABLE_TEST=ON
           -DKRLibrary_ENABLE_CODE_COVERAGE=ON
           -DKRLibrary_ENABLE_ADDRESS_SANITIZER="${USE_ASAN}"
 
