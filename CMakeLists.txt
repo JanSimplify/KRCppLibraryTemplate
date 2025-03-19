@@ -59,7 +59,7 @@ option(
 cmake_dependent_option(
     "${PROJECT_NAME}_ENABLE_TEST"
     "Enalbe test"
-    ON
+    "{BUILD_TESTING}"
     "PROJECT_IS_TOP_LEVEL"
     OFF
 )
