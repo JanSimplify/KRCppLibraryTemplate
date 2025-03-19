@@ -89,13 +89,6 @@ set(enable_develop_mode "${${PROJECT_NAME}_DEVELOP_MODE}")
 
 include(cmake/dependencies.cmake)
 
-# set asan for catch2
-if(enable_address_sanitizer)
-    add_compile_options(
-        "$<$<OR:$<COMPILE_LANG_AND_ID:C,MSVC>,$<COMPILE_LANG_AND_ID:CXX,MSVC>>:/fsanitize=address>"
-    )
-endif()
-
 #=============================
 # Targets
 #=============================
