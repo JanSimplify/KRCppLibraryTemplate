@@ -79,6 +79,33 @@ jobs:
         BUILD_TYPE: ${{ matrix.build_type }}
       run: cmake --install "${BINARY_DIR}" --config "${BUILD_TYPE}" --prefix "${INSTALL_DIR}"
 
+    - name: Configure Tests Static Standalone
+      env:
+        SOURCE_DIR: ${{ steps.strings.outputs.tests-source-dir }}
+        BINARY_DIR: ${{ steps.strings.outputs.tests-build-dir }}
+        INSTALL_DIR: ${{ steps.strings.outputs.install-dir }}
+        BUILD_TYPE: ${{ matrix.build_type }}
+        C_COMPILE: ${{ matrix.c_compiler }}
+        CXX_COMPILE: ${{ matrix.cxx_compiler }}
+      run: >
+        cmake -S "${SOURCE_DIR}" -B "${BINARY_DIR}"
+        -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+        -DCMAKE_C_COMPILER="${C_COMPILE}"
+        -DCMAKE_CXX_COMPILER="${CXX_COMPILE}"
+        -DCMAKE_VS_GLOBALS="UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true"
+        -DKRLibrary_ROOT="${INSTALL_DIR}"
+        -DKRLibrary_USE_SHARED_LIBS=OFF
+
+    - name: Build Tests Static Standalone
+      env:
+        BINARY_DIR: ${{ steps.strings.outputs.tests-build-dir }}
+        BUILD_TYPE: ${{ matrix.build_type }}
+      run: cmake --build "${BINARY_DIR}" --config "${BUILD_TYPE}" -j
+
+    - name: Test Static Standalone
+      working-directory: ${{ steps.strings.outputs.tests-build-dir }}
+      run: ctest --build-config ${{ matrix.build_type }}
+
     - name: Configure Tests Shared Standalone
       env:
         SOURCE_DIR: ${{ steps.strings.outputs.tests-source-dir }}
