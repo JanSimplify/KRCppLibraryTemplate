@@ -82,11 +82,11 @@ KRLibrary_ENABLE_INSTALL_SHARED:BOOL=TRUE
 KRLibrary_ENABLE_INSTALL_STATIC:BOOL=TRUE
 ```
 
-是否编译测试代码：
+是否编译测试代码，其默认值为[BUILD_TESTING](https://cmake.org/cmake/help/latest/variable/BUILD_TESTING.html)，且作为子项目时总是关闭：
 
 ```c
 //Enalbe test
-KRLibrary_ENABLE_TEST:BOOL=TRUE
+KRLibrary_ENABLE_TEST:BOOL=OFF
 ```
 
 是否启用`address sanitizer`进行构建，默认关闭，注意MSVC中静态链接时需要保证各个库的`address sanitizer`选项一致，否则会导致链接错误：
